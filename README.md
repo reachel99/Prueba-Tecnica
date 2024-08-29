@@ -3,8 +3,7 @@ Este proyecto consiste en una API desarrollada con Java y Spring Boot, utilizand
 
 ** Instalación
 Clona el repositorio:
-git clone https://github.com/tu-usuario/tu-repositorio.git
-cd tu-repositorio
+git clone (https://github.com/reachel99/Prueba-Tecnica)
 
 ** Configura la base de datos PostgreSQL:
 Crea una base de datos llamada tecnica.
