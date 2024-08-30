@@ -2,7 +2,6 @@ package com.programa.prueba.model;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
@@ -28,40 +27,15 @@ public class Cuenta {
     @NotNull
     private Boolean estado;
 
-    @ManyToOne
-    @JoinColumn(name = "cliente_id")
-    private Cliente cliente;
+    @NotNull
+    private Long clienteId;
 
-    public Long getId() {
-        return id;
+    public @NotNull Long getClienteId() {
+        return clienteId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public @NotNull String getNumeroCuenta() {
-        return numeroCuenta;
-    }
-
-    public void setNumeroCuenta(@NotNull String numeroCuenta) {
-        this.numeroCuenta = numeroCuenta;
-    }
-
-    public @NotNull String getTipoCuenta() {
-        return tipoCuenta;
-    }
-
-    public void setTipoCuenta(@NotNull String tipoCuenta) {
-        this.tipoCuenta = tipoCuenta;
-    }
-
-    public @NotNull BigDecimal getSaldoInicial() {
-        return saldoInicial;
-    }
-
-    public void setSaldoInicial(@NotNull BigDecimal saldoInicial) {
-        this.saldoInicial = saldoInicial;
+    public void setClienteId(@NotNull Long clienteId) {
+        this.clienteId = clienteId;
     }
 
     public @NotNull Boolean getEstado() {
@@ -72,11 +46,35 @@ public class Cuenta {
         this.estado = estado;
     }
 
-    public Cliente getCliente() {
-        return cliente;
+    public @NotNull BigDecimal getSaldoInicial() {
+        return saldoInicial;
     }
 
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
+    public void setSaldoInicial(@NotNull BigDecimal saldoInicial) {
+        this.saldoInicial = saldoInicial;
+    }
+
+    public @NotNull String getTipoCuenta() {
+        return tipoCuenta;
+    }
+
+    public void setTipoCuenta(@NotNull String tipoCuenta) {
+        this.tipoCuenta = tipoCuenta;
+    }
+
+    public @NotNull String getNumeroCuenta() {
+        return numeroCuenta;
+    }
+
+    public void setNumeroCuenta(@NotNull String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
