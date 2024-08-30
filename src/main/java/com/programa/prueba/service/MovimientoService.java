@@ -1,62 +1,62 @@
-package com.programa.prueba.service;
+package com.programa.prueba.controller;
 
 import com.programa.prueba.exception.SaldoInsuficienteException;
-import com.programa.prueba.model.Cuenta;
 import com.programa.prueba.model.Movimiento;
-import com.programa.prueba.repository.CuentaRepository;
-import com.programa.prueba.repository.MovimientoRepository;
+import com.programa.prueba.service.MovimientoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
 
-@Service
-public class MovimientoService {
 
+
+@RestController
+@RequestMapping("/movimientos")
+@Validated
+public class MovimientoController {
     @Autowired
-    private MovimientoRepository movimientoRepository;
+    private MovimientoService movimientoService;
 
-    @Autowired
-    private CuentaRepository cuentaRepository;
-
-    public Movimiento saveMovimiento(Movimiento movimiento) {
-        Optional<Cuenta> cuentaOpt = cuentaRepository.findById(movimiento.getCuenta().getId());
-        if (cuentaOpt.isEmpty()) {
-            throw new IllegalArgumentException("Cuenta no encontrada");
+    @PostMapping
+    public ResponseEntity<String> crearMovimiento(@RequestBody Movimiento movimiento) {
+        try {
+            movimientoService.crearMovimiento(movimiento);
+            return ResponseEntity.ok("Movimiento registrado con éxito");
+        } catch (SaldoInsuficienteException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
 
-        Cuenta cuenta = cuentaOpt.get();
-        BigDecimal nuevoSaldo;
+    @GetMapping
+    public ResponseEntity<List<Movimiento>> obtenerTodosMovimientos() {
+        return ResponseEntity.ok(movimientoService.obtenerTodosMovimientos());
+    }
 
-        if (movimiento.getTipo().equalsIgnoreCase("Deposito")) {
-            nuevoSaldo = cuenta.getSaldoInicial().add(movimiento.getValor());
-        } else if (movimiento.getTipo().equalsIgnoreCase("Retiro")) {
-            nuevoSaldo = cuenta.getSaldoInicial().subtract(movimiento.getValor());
-            if (nuevoSaldo.compareTo(BigDecimal.ZERO) < 0) {
-                throw new SaldoInsuficienteException("Saldo no disponible");
-            }
-        } else {
-            throw new IllegalArgumentException("Tipo de movimiento no reconocido");
+    @GetMapping("/{id}")
+    public ResponseEntity<Movimiento> obtenerMovimientoPorId(@PathVariable Long id) {
+        Movimiento movimiento = movimientoService.obtenerMovimientoPorId(id);
+        if (movimiento != null) {
+            return ResponseEntity.ok(movimiento);
         }
-
-        cuenta.setSaldoInicial(nuevoSaldo);
-        cuentaRepository.save(cuenta);
-
-        movimiento.setSaldo(nuevoSaldo);
-        movimiento.setFecha(new java.sql.Timestamp(System.currentTimeMillis())); 
-        return movimientoRepository.save(movimiento);
+        return ResponseEntity.notFound().build();
     }
 
-    public Optional<Movimiento> getMovimientoById(Long id) {
-        return movimientoRepository.findById(id);
+    @PutMapping("/{id}")
+    public ResponseEntity<Movimiento> actualizarMovimiento(@PathVariable Long id, @RequestBody Movimiento movimiento) {
+        Movimiento movimientoActualizado = movimientoService.actualizarMovimiento(id, movimiento);
+        if (movimientoActualizado != null) {
+            return ResponseEntity.ok(movimientoActualizado);
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    public Iterable<Movimiento> getAllMovimientos() {
-        return movimientoRepository.findAll();
-    }
-
-    public void deleteMovimiento(Long id) {
-        movimientoRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarMovimiento(@PathVariable Long id) {
+        movimientoService.eliminarMovimiento(id);
+        return ResponseEntity.noContent().build();
     }
 }
