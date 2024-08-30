@@ -3,64 +3,60 @@ package com.programa.prueba.controller;
 import com.programa.prueba.exception.SaldoInsuficienteException;
 import com.programa.prueba.model.Movimiento;
 import com.programa.prueba.service.MovimientoService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 
 
 @RestController
 @RequestMapping("/movimientos")
+@Validated
 public class MovimientoController {
-
-
     @Autowired
     private MovimientoService movimientoService;
 
     @PostMapping
     public ResponseEntity<String> crearMovimiento(@RequestBody Movimiento movimiento) {
         try {
-            Movimiento nuevoMovimiento = movimientoService.saveMovimiento(movimiento);
-            if (movimiento.getTipo().equalsIgnoreCase("Deposito")) {
-                return ResponseEntity.ok("Depósito realizado exitosamente. Saldo actual: " + nuevoMovimiento.getSaldo());
-            } else if (movimiento.getTipo().equalsIgnoreCase("Retiro")) {
-                return ResponseEntity.ok("Retiro realizado exitosamente. Saldo actual: " + nuevoMovimiento.getSaldo());
-            }
-        } catch (Exception e) {
+            movimientoService.crearMovimiento(movimiento);
+            return ResponseEntity.ok("Movimiento registrado con éxito");
+        } catch (SaldoInsuficienteException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.badRequest().body("Operación no válida.");
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Movimiento> getMovimientoById(@PathVariable Long id) {
-        return movimientoService.getMovimientoById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Movimiento>> getAllMovimientos() {
-        return ResponseEntity.ok(movimientoService.getAllMovimientos());
+    public ResponseEntity<List<Movimiento>> obtenerTodosMovimientos() {
+        return ResponseEntity.ok(movimientoService.obtenerTodosMovimientos());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Movimiento> obtenerMovimientoPorId(@PathVariable Long id) {
+        Movimiento movimiento = movimientoService.obtenerMovimientoPorId(id);
+        if (movimiento != null) {
+            return ResponseEntity.ok(movimiento);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Movimiento> updateMovimiento(@PathVariable Long id, @Valid @RequestBody Movimiento movimiento) {
-        if (!movimientoService.getMovimientoById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<Movimiento> actualizarMovimiento(@PathVariable Long id, @RequestBody Movimiento movimiento) {
+        Movimiento movimientoActualizado = movimientoService.actualizarMovimiento(id, movimiento);
+        if (movimientoActualizado != null) {
+            return ResponseEntity.ok(movimientoActualizado);
         }
-        movimiento.setId(id);
-        Movimiento updatedMovimiento = movimientoService.saveMovimiento(movimiento);
-        return ResponseEntity.ok(updatedMovimiento);
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovimiento(@PathVariable Long id) {
-        if (!movimientoService.getMovimientoById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        movimientoService.deleteMovimiento(id);
+    public ResponseEntity<Void> eliminarMovimiento(@PathVariable Long id) {
+        movimientoService.eliminarMovimiento(id);
         return ResponseEntity.noContent().build();
     }
 }
