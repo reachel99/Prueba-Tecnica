@@ -29,7 +29,6 @@ public class MovimientoService {
         Cuenta cuenta = cuentaOpt.get();
         BigDecimal nuevoSaldo;
 
-        // Realizar la operación de acuerdo al tipo de movimiento
         if (movimiento.getTipo().equalsIgnoreCase("Deposito")) {
             nuevoSaldo = cuenta.getSaldoInicial().add(movimiento.getValor());
         } else if (movimiento.getTipo().equalsIgnoreCase("Retiro")) {
@@ -41,12 +40,11 @@ public class MovimientoService {
             throw new IllegalArgumentException("Tipo de movimiento no reconocido");
         }
 
-        // Actualizar el saldo de la cuenta y guardar el movimiento
         cuenta.setSaldoInicial(nuevoSaldo);
         cuentaRepository.save(cuenta);
 
         movimiento.setSaldo(nuevoSaldo);
-        movimiento.setFecha(new java.sql.Timestamp(System.currentTimeMillis())); // Fecha automática
+        movimiento.setFecha(new java.sql.Timestamp(System.currentTimeMillis())); 
         return movimientoRepository.save(movimiento);
     }
 
