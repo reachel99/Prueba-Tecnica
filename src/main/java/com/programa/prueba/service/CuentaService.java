@@ -29,7 +29,4 @@ public class CuentaService {
         cuentaRepository.deleteById(id);
     }
 
-    public Optional<Cuenta> findById(Long id) {
-        return cuentaRepository.findById(id);
-    }
 }
