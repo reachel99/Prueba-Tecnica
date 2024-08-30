@@ -19,6 +19,9 @@ public class CuentaController {
 
     @PostMapping
     public ResponseEntity<Cuenta> createCuenta(@Valid @RequestBody Cuenta cuenta) {
+        if (cuenta.getClienteId() == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         try {
             Cuenta nuevaCuenta = cuentaService.saveCuenta(cuenta);
             return new ResponseEntity<>(nuevaCuenta, HttpStatus.CREATED);
@@ -26,6 +29,7 @@ public class CuentaController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Cuenta> getCuentaById(@PathVariable Long id) {
